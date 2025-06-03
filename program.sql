@@ -90,7 +90,7 @@ create table usuario (
     pessoa_id varchar(36),
     tipo_usuario_id varchar(36),
     foreign key (pessoa_id) references pessoa(id),
-    foreign key (tipo_usuario) references tipo_usuario(id)
+    foreign key (tipo_usuario_id) references tipo_usuario(id)
 );
 
 create table tipo_usuario (
