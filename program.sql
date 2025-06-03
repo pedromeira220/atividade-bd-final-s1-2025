@@ -1,107 +1,108 @@
--- Criação das tabelas do banco de dados
+-- Criação das tabelas do banco de dados com UUID como chave primária
 
 create table bandeira (
-    nome varchar(64) primary key,
+    id varchar(36) primary key,
+    nome varchar(64) unique,
     url varchar(64)
 );
 
 create table posto (
-    cnpj varchar(20) primary key,
+    id varchar(36) primary key,
+    cnpj varchar(20) unique,
     razao_social varchar(128),
     nome_fantasia varchar(128),
     latitude decimal(9,6),
     longitude decimal(9,6),
     endereco varchar(128),
     telefone varchar(20),
-    bandeira_nome varchar(64),
-    foreign key (bandeira_nome) references bandeira(nome)
+    bandeira_id varchar(36),
+    foreign key (bandeira_id) references bandeira(id)
 );
 
 create table bairro (
-    nome varchar(64) primary key,
-    cidade_nome varchar(64),
-    foreign key (cidade_nome) references cidade(nome)
+    id varchar(36) primary key,
+    nome varchar(64) unique,
+    cidade_id varchar(36) not null,
+    foreign key (cidade_id) references cidade(id)
 );
 
 create table cidade (
+    id varchar(36) primary key,
     nome varchar(64),
     estado varchar(64),
     latitude decimal(9,6),
     longitude decimal(9,6),
-    primary key (nome, estado)
+    unique (nome, estado)
 );
 
 create table preco (
+    id varchar(36) primary key,
     valor decimal(10,2),
     momento datetime,
-    posto_cnpj varchar(20),
-    combustivel_nome varchar(64),
-    primary key (valor, momento, posto_cnpj, combustivel_nome),
-    foreign key (posto_cnpj, combustivel_nome) references posto_combustivel(posto_cnpj, combustivel_nome)
+    posto_combustivel_id varchar(36) not null,
+    foreign key (posto_combustivel_id) references posto_combustivel(id)
 );
 
 create table posto_combustivel (
-    posto_cnpj varchar(20),
-    combustivel_nome varchar(64),
-    primary key (posto_cnpj, combustivel_nome),
-    foreign key (posto_cnpj) references posto(cnpj),
-    foreign key (combustivel_nome) references combustivel(nome)
+    id varchar(36) primary key,
+    posto_id varchar(36),
+    combustivel_id varchar(36),
+    unique (posto_id, combustivel_id),
+    foreign key (posto_id) references posto(id),
+    foreign key (combustivel_id) references combustivel(id)
 );
 
 create table combustivel (
-    nome varchar(64) primary key
-);
-
-create table pessoa (
-    login varchar(64) primary key,
-    nome varchar(128),
-    endereco varchar(128),
-    bairro_nome varchar(64),
-    foreign key (bairro_nome) references bairro(nome)
+    id varchar(36) primary key,
+    nome varchar(64) unique
 );
 
 create table veiculo (
-    placa varchar(20) primary key,
+    id varchar(36) primary key,
+    placa varchar(20) unique,
     marca varchar(64),
     modelo varchar(64),
-    pessoa_login varchar(64),
-    foreign key (pessoa_login) references pessoa(login)
-);
-
-create table usuario (
-    login varchar(64) primary key,
-    senha varchar(128),
-    foreign key (login) references pessoa(login)
-);
-
-create table tipo_usuario (
-    nome varchar(64) primary key
-);
-
-create table usuario_tipo (
-    usuario_login varchar(64),
-    tipo_usuario_nome varchar(64),
-    primary key (usuario_login, tipo_usuario_nome),
-    foreign key (usuario_login) references usuario(login),
-    foreign key (tipo_usuario_nome) references tipo_usuario(nome)
-);
-
-create table comentario (
-    pessoa_login varchar(64),
-    posto_cnpj varchar(20),
-    momento datetime,
-    primary key ( momento),
-    foreign key (pessoa_login) references pessoa(login),
-    foreign key (posto_cnpj) references posto(cnpj)
+    pessoa_id varchar(36) not null,
+    foreign key (pessoa_id) references pessoa(id)
 );
 
 create table abastecimento (
-    veiculo_placa varchar(20),
-    posto_cnpj varchar(20),
-    combustivel_nome varchar(64),
+    id varchar(36) primary key,
+    veiculo_id varchar(36),
+    combustivel_id varchar(36),
+    foreign key (veiculo_id) references veiculo(id),
+    foreign key (combustivel_id) references combustivel(id)
+);
+
+create table pessoa (
+    id varchar(36) primary key,
+    login varchar(64) unique,
+    nome varchar(128),
+    endereco varchar(128),
+    bairro_id varchar(36) not null,
+    foreign key (bairro_id) references bairro(id)
+);
+
+create table usuario (
+    id varchar(36) primary key,
+    login varchar(64) unique,
+    senha varchar(128),
+    pessoa_id varchar(36),
+    tipo_usuario_id varchar(36),
+    foreign key (pessoa_id) references pessoa(id),
+    foreign key (tipo_usuario) references tipo_usuario(id)
+);
+
+create table tipo_usuario (
+    id varchar(36) primary key,
+    nome varchar(64) unique
+);
+
+create table comentario (
+    id varchar(36) primary key,
+    pessoa_id varchar(36),
+    posto_id varchar(36),
     momento datetime,
-    primary key (veiculo_placa, posto_cnpj, combustivel_nome, momento),
-    foreign key (veiculo_placa) references veiculo(placa),
-    foreign key (posto_cnpj) references posto(cnpj),
-    foreign key (combustivel_nome) references combustivel(nome)
+    foreign key (pessoa_id) references pessoa(id),
+    foreign key (posto_id) references posto(id)
 );
