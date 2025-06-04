@@ -106,3 +106,61 @@ create table comentario (
     foreign key (pessoa_id) references pessoa(id),
     foreign key (posto_id) references posto(id)
 );
+
+-- Inserção de registros no banco de dados
+
+INSERT INTO tipo_usuario (id, nome) VALUES 
+('tipo-1', 'Administrador'),
+('tipo-2', 'Usuário Comum');
+
+INSERT INTO cidade (id, nome, estado, latitude, longitude) VALUES
+('cidade-1', 'Campinas', 'SP', -22.9099, -47.0626),
+('cidade-2', 'Sumaré', 'SP', -22.8212, -47.2666);
+
+INSERT INTO bairro (id, nome, cidade_id) VALUES
+('bairro-1', 'Centro', 'cidade-1'),
+('bairro-2', 'Centro Sumaré', 'cidade-2');
+
+INSERT INTO pessoa (id, login, nome, endereco, bairro_id) VALUES
+('pessoa-1', 'pedro-meira', 'Pedro Meira', 'Rua XPTO, 123', 'bairro-1'),
+('pessoa-2', 'joao-pedro', 'João Pedro', 'Avenida Brasil, 456', 'bairro-2');
+
+INSERT INTO usuario (id, login, senha, pessoa_id, tipo_usuario_id) VALUES
+('usuario-1', 'pedro-meira', 'senha123', 'pessoa-1', 'tipo-1'),
+('usuario-2', 'joao-pedro', 'senha456', 'pessoa-2', 'tipo-2');
+
+INSERT INTO bandeira (id, nome, url) VALUES
+('bandeira-1', 'Shell', 'http://shell.com'),
+('bandeira-2', 'Ipiranga', 'http://ipiranga.com');
+
+INSERT INTO posto (id, cnpj, razao_social, nome_fantasia, latitude, longitude, endereco, telefone, bandeira_id) VALUES
+('posto-1', '12345678000199', 'Posto Shell', 'Posto Shell Centro', -22.9099, -47.0626, 'Rua XPO, 789', '(19) 99999-9999', 'bandeira-1'),
+('posto-2', '98765432000188', 'Posto Ipiranga', 'Ipiranga Sumaré', -22.8212, -47.2666, 'Avenida XPTO, 321', '(19) 98888-8888', 'bandeira-2');
+
+INSERT INTO combustivel (id, nome) VALUES
+('combustivel-1', 'Gasolina'),
+('combustivel-2', 'Etanol');
+
+INSERT INTO posto_combustivel (id, posto_id, combustivel_id) VALUES
+('pc-1', 'posto-1', 'combustivel-1'),
+('pc-2', 'posto-1', 'combustivel-2'),
+('pc-3', 'posto-2', 'combustivel-1');
+
+INSERT INTO preco (id, valor, momento, posto_combustivel_id) VALUES
+('preco-1', 5.79, '2025-06-01 08:00:00', 'pc-1'),
+('preco-2', 3.99, '2025-06-03 08:30:00', 'pc-2'),
+('preco-3', 5.89, '2025-06-02 09:00:00', 'pc-3');
+
+INSERT INTO veiculo (id, placa, marca, modelo, pessoa_id) VALUES
+('veiculo-1', 'ABC1234', 'Toyota', 'Corolla', 'pessoa-1'),
+('veiculo-2', 'XYZ5678', 'Honda', 'Civic', 'pessoa-2');
+
+INSERT INTO abastecimento (id, veiculo_id, combustivel_id) VALUES
+('abastecimento-1', 'veiculo-1', 'combustivel-1'),
+('abastecimento-2', 'veiculo-1', 'combustivel-2'),
+('abastecimento-3', 'veiculo-2', 'combustivel-1');
+
+INSERT INTO comentario (id, pessoa_id, posto_id, momento) VALUES
+('comentario-1', 'pessoa-1', 'posto-1', '2025-06-02 10:00:00'),
+('comentario-2', 'pessoa-2', 'posto-2', '2025-06-02 11:00:00');
+
