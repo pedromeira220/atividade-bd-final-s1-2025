@@ -164,3 +164,116 @@ INSERT INTO comentario (id, pessoa_id, posto_id, momento) VALUES
 ('comentario-1', 'pessoa-1', 'posto-1', '2025-06-02 10:00:00'),
 ('comentario-2', 'pessoa-2', 'posto-2', '2025-06-02 11:00:00');
 
+-- 1) listar os postos e o preço mais recente de cada combustível
+
+select 
+    p.nome_fantasia as posto, 
+    c.nome as combustivel, 
+    pr.valor as preco, 
+    pr.momento
+from posto p
+join posto_combustivel pc on p.id = pc.posto_id
+join combustivel c on c.id = pc.combustivel_id
+join preco pr on pr.posto_combustivel_id = pc.id
+where pr.momento = (
+    select max(pr2.momento)
+    from preco pr2
+    where pr2.posto_combustivel_id = pc.id
+)
+order by p.nome_fantasia, c.nome;
+
+-- 2) listar os comentários dos usuários por posto, mais recentes primeiro
+
+select 
+    p.nome_fantasia as posto,
+    pes.nome as usuario,
+    c.momento,
+    c.id as id_comentario
+from comentario c
+join pessoa pes on pes.id = c.pessoa_id
+join posto p on p.id = c.posto_id
+order by c.momento desc;
+
+-- 3) listar quais veículos cada usuário possui e quais combustíveis são suportados (via tabela abastecimento)
+
+select 
+    pes.nome as usuario,
+    v.placa,
+    v.marca,
+    v.modelo,
+    distinct c.nome as combustivel
+from pessoa pes
+join veiculo v on v.pessoa_id = pes.id
+join abastecimento a on a.veiculo_id = v.id
+join combustivel c on c.id = a.combustivel_id
+order by pes.nome, v.placa;
+
+-- 4) filtrar postos por bandeira e bairro (como sugerido no artigo)
+
+select 
+    p.nome_fantasia,
+    b.nome as bandeira,
+    ba.nome as bairro
+from posto p
+join bandeira b on b.id = p.bandeira_id
+join bairro ba on ba.id = (
+    select pe.bairro_id
+    from pessoa pe
+    join comentario c on c.pessoa_id = pe.id
+    where c.posto_id = p.id
+    limit 1
+)
+order by b.nome, ba.nome, p.nome_fantasia;
+
+-- 5) consulta de melhor custo-benefício (simulando cálculo rendimento com fator — ex: gasolina = 1.0, etanol = 0.7)
+
+select 
+    p.nome_fantasia as posto,
+    c.nome as combustivel,
+    pr.valor as preco,
+    case 
+        when c.nome = 'gasolina' then pr.valor / 1.0
+        when c.nome = 'etanol' then pr.valor / 0.7
+        when c.nome = 'gnv' then pr.valor / 1.25
+        else pr.valor 
+    end as custo_proporcional
+from posto p
+join posto_combustivel pc on p.id = pc.posto_id
+join combustivel c on c.id = pc.combustivel_id
+join preco pr on pr.posto_combustivel_id = pc.id
+where pr.momento = (
+    select max(pr2.momento)
+    from preco pr2
+    where pr2.posto_combustivel_id = pc.id
+)
+order by custo_proporcional asc;
+
+-- 6) quantidade de comentários por posto (classificação por "popularidade")
+
+select 
+    p.nome_fantasia,
+    count(c.id) as total_comentarios
+from posto p
+left join comentario c on c.posto_id = p.id
+group by p.id
+order by total_comentarios desc;
+
+-- 7) usuários sem veículos cadastrados (detecção de usuários "incompletos")
+
+select 
+    pes.nome,
+    pes.login
+from pessoa pes
+left join veiculo v on v.pessoa_id = pes.id
+where v.id is null;
+
+-- 8) veículos que já foram abastecidos com mais de um tipo de combustível (usuários com carro flex)
+
+select 
+    v.placa,
+    count(distinct a.combustivel_id) as qtd_tipos_combustivel
+from veiculo v
+join abastecimento a on a.veiculo_id = v.id
+group by v.id
+having qtd_tipos_combustivel > 1
+order by qtd_tipos_combustivel desc;
