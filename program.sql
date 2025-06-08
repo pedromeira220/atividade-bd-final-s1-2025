@@ -19,13 +19,6 @@ create table posto (
     foreign key (bandeira_id) references bandeira(id)
 );
 
-create table bairro (
-    id varchar(36) primary key,
-    nome varchar(64) unique,
-    cidade_id varchar(36) not null,
-    foreign key (cidade_id) references cidade(id)
-);
-
 create table cidade (
     id varchar(36) primary key,
     nome varchar(64),
@@ -35,12 +28,16 @@ create table cidade (
     unique (nome, estado)
 );
 
-create table preco (
+create table bairro (
     id varchar(36) primary key,
-    valor decimal(10,2),
-    momento datetime,
-    posto_combustivel_id varchar(36) not null,
-    foreign key (posto_combustivel_id) references posto_combustivel(id)
+    nome varchar(64) unique,
+    cidade_id varchar(36) not null,
+    foreign key (cidade_id) references cidade(id)
+);
+
+create table combustivel (
+    id varchar(36) primary key,
+    nome varchar(64) unique
 );
 
 create table posto_combustivel (
@@ -52,9 +49,21 @@ create table posto_combustivel (
     foreign key (combustivel_id) references combustivel(id)
 );
 
-create table combustivel (
+create table preco (
     id varchar(36) primary key,
-    nome varchar(64) unique
+    valor decimal(10,2),
+    momento datetime,
+    posto_combustivel_id varchar(36) not null,
+    foreign key (posto_combustivel_id) references posto_combustivel(id)
+);
+
+create table pessoa (
+    id varchar(36) primary key,
+    login varchar(64) unique,
+    nome varchar(128),
+    endereco varchar(128),
+    bairro_id varchar(36) not null,
+    foreign key (bairro_id) references bairro(id)
 );
 
 create table veiculo (
@@ -74,14 +83,11 @@ create table abastecimento (
     foreign key (combustivel_id) references combustivel(id)
 );
 
-create table pessoa (
+create table tipo_usuario (
     id varchar(36) primary key,
-    login varchar(64) unique,
-    nome varchar(128),
-    endereco varchar(128),
-    bairro_id varchar(36) not null,
-    foreign key (bairro_id) references bairro(id)
+    nome varchar(64) unique
 );
+
 
 create table usuario (
     id varchar(36) primary key,
@@ -93,10 +99,6 @@ create table usuario (
     foreign key (tipo_usuario_id) references tipo_usuario(id)
 );
 
-create table tipo_usuario (
-    id varchar(36) primary key,
-    nome varchar(64) unique
-);
 
 create table comentario (
     id varchar(36) primary key,
@@ -107,15 +109,15 @@ create table comentario (
     foreign key (posto_id) references posto(id)
 );
 
--- Inserção de registros no banco de dados
+-- inserção de registros no banco de dados
 
 INSERT INTO tipo_usuario (id, nome) VALUES 
 ('tipo-1', 'Administrador'),
 ('tipo-2', 'Usuário Comum');
 
 INSERT INTO cidade (id, nome, estado, latitude, longitude) VALUES
-('cidade-1', 'Campinas', 'SP', -22.9099, -47.0626),
-('cidade-2', 'Sumaré', 'SP', -22.8212, -47.2666);
+('cidade-1', 'Campinas', 'SP', -22.1, -47.0),
+('cidade-2', 'Sumaré', 'SP', -22.7, -47.2;
 
 INSERT INTO bairro (id, nome, cidade_id) VALUES
 ('bairro-1', 'Centro', 'cidade-1'),
@@ -131,11 +133,11 @@ INSERT INTO usuario (id, login, senha, pessoa_id, tipo_usuario_id) VALUES
 
 INSERT INTO bandeira (id, nome, url) VALUES
 ('bandeira-1', 'Shell', 'http://shell.com'),
-('bandeira-2', 'Ipiranga', 'http://ipiranga.com');
+('bandeira-2', 'Ipiranga', 'https://portal.ipiranga');
 
 INSERT INTO posto (id, cnpj, razao_social, nome_fantasia, latitude, longitude, endereco, telefone, bandeira_id) VALUES
-('posto-1', '12345678000199', 'Posto Shell', 'Posto Shell Centro', -22.9099, -47.0626, 'Rua XPO, 789', '(19) 99999-9999', 'bandeira-1'),
-('posto-2', '98765432000188', 'Posto Ipiranga', 'Ipiranga Sumaré', -22.8212, -47.2666, 'Avenida XPTO, 321', '(19) 98888-8888', 'bandeira-2');
+('posto-1', '12345678000199', 'Posto Shell', 'Posto Shell Centro', -22.9, -47.0, 'Rua XPO, 789', '(19) 99999-9999', 'bandeira-1'),
+('posto-2', '98765432000188', 'Posto Ipiranga', 'Ipiranga Sumaré', -22.8, -47.2, 'Avenida XPTO, 321', '(19) 98888-8888', 'bandeira-2');
 
 INSERT INTO combustivel (id, nome) VALUES
 ('combustivel-1', 'Gasolina'),
@@ -228,13 +230,13 @@ where c.id in (
     where a.veiculo_id = 'uuid-veiculo-1'
 );
 
--- 9) listar as bandeiras cadastradas no sistema
+-- listar as bandeiras cadastradas no sistema
 
 select nome, url 
 from bandeira 
 order by nome;
 
--- 10) listar a quantidade de veículos cadastrados por pessoa
+-- listar a quantidade de veículos cadastrados por pessoa
 
 select 
     pes.nome, 
